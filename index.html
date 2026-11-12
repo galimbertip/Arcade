@@ -157,8 +157,14 @@
 </div>
 
 <script>
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 const CHANGELOG = [
+  { v:"1.2.0", d:"12/11/2026", items:[
+    "Micro Rush, Nailcap e Gorilla 2026 si aprono dalle loro pagine GitHub: niente più login",
+    "Gorilla 2026 ora giocabile (The Banana Wars)",
+    "Descrizioni aggiornate di Micro Rush e Gorilla 2026",
+    "Sacro Imperio e D&D Alone segnalati con «Serve l'accesso a Claude»"
+  ]},
   { v:"1.1.0", d:"12/11/2026", items:[
     "La sala giochi vive nel repo GitHub galimbertip/Arcade ed è pubblicata su GitHub Pages",
     "Installabile come app (PWA) su PC, smartphone e tablet, con icona propria",
@@ -247,20 +253,20 @@ gorilla:`<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
 /* ---------- catalogo ---------- */
 const GAMES = [
   { id:"micro-rush", name:"Micro Rush", sub:"Micro Machines 2026", cat:"Corse", accent:"#ff7a3d", art:"micro",
-    desc:"Gare di macchinine in miniatura su piste fatte di oggetti di casa, con lo spirito arcade di Out Run e World Rally.",
-    url:"https://claude.ai/artifact/KgQ2eJc1pjEdrwSpP4cL9T" },
+    desc:"Macchinine in miniatura sui tavoli di casa: gara a 4 giri contro 3 rivali, eliminazione fuori schermo e cronometro contro il fantasma.",
+    url:"https://galimbertip.github.io/Mocromachines-2026/" },
   { id:"nailcap", name:"Nailcap", sub:"Lemmings 2026", cat:"Puzzle", accent:"#3dff8a", art:"nail",
     desc:"Guida la folla di funghetti Nailcap in 5 mondi e 25 livelli assegnando ruoli, con riavvolgimento del tempo, vento, buio e micelio.",
-    url:"https://claude.ai/artifact/5sEyKAJeaswN63Bfa5cPKf" },
+    url:"https://galimbertip.github.io/Lemmings2026/" },
   { id:"sacro-imperio", name:"Saint Seiya: Sacro Imperio", sub:"GDR punta e clicca", cat:"GDR e Avventura", accent:"#ffd23f", art:"seiya",
     desc:"Pixel art anni '90: esplora il Grande Tempio, le Case d'Oro, la taverna e l'arena, con allenamenti e scontri ai dadi.",
-    url:"https://claude.ai/artifact/43ZCcHNYXpgadKqPigW2kb" },
+    url:"https://claude.ai/artifact/43ZCcHNYXpgadKqPigW2kb", login:true },
   { id:"dnd-alone", name:"D&D Alone", sub:"Avventura in solitaria", cat:"GDR e Avventura", accent:"#ff5a6e", art:"dnd",
     desc:"Avventura di Dungeons & Dragons da giocare da solo, con il master gestito da Claude e la tua scheda personaggio.",
-    url:"https://claude.ai/artifact/4EZPvY3tKXK8WiBAG5nGor" },
+    url:"https://claude.ai/artifact/4EZPvY3tKXK8WiBAG5nGor", login:true },
   { id:"gorilla", name:"Gorilla 2026", sub:"Gorilla + Worms", cat:"Strategia", accent:"#22e4ff", art:"gorilla",
-    desc:"Il duello di banane tra i grattacieli rifatto con lo spirito di Worms Armageddon. Da collegare alla sala giochi.",
-    url:null }
+    desc:"The Banana Wars: artiglieria a turni tra i grattacieli. Mira, carica la potenza e lancia la banana, in due sullo stesso schermo o contro il computer.",
+    url:"https://galimbertip.github.io/Gorilla2026/" }
 ];
 
 /* ---------- stato locale (solo comodità di questo dispositivo) ---------- */
@@ -312,7 +318,7 @@ function renderGrid(){
         <div class="sub">${g.sub}</div>
         <p>${g.desc}</p>
         <div class="meta">
-          <span class="last">${plays[g.id]?"Giocato "+ago(plays[g.id]):(g.url?"Mai aperto da qui":"In arrivo")}</span>
+          <span class="last">${g.login?"🔑 Serve l'accesso a Claude<br>":""}${plays[g.id]?"Giocato "+ago(plays[g.id]):(g.url?"Mai aperto da qui":"In arrivo")}</span>
           ${g.url
             ? `<a class="play" href="${g.url}" target="_blank" rel="noopener" data-id="${g.id}">▶ GIOCA</a>`
             : `<span class="play off">PRESTO</span>`}

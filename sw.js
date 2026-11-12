@@ -1,6 +1,6 @@
 // GPverse Arcade — service worker
 // Cambia CACHE a ogni nuova versione dell'app.
-const CACHE = "gpverse-arcade-v1.1.0";
+const CACHE = "gpverse-arcade-v1.2.0";
 const SHELL = [
   "./",
   "./index.html",

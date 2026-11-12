@@ -2,7 +2,7 @@
 
 La sala giochi GPverse: un'unica app da installare su PC, smartphone e tablet, da cui si aprono tutti i giochi.
 
-**Versione attuale:** V.1.1.0 · App online: https://galimbertip.github.io/Arcade/
+**Versione attuale:** V.1.2.0 · App online: https://galimbertip.github.io/Arcade/
 
 ## Giochi
 
@@ -12,9 +12,9 @@ La sala giochi GPverse: un'unica app da installare su PC, smartphone e tablet, d
 | Nailcap | Puzzle | Lemmings + Portal |
 | Saint Seiya: Sacro Imperio | GDR e Avventura | Saint Seiya, D&D, Football Manager |
 | D&D Alone | GDR e Avventura | Dungeons & Dragons in solitaria |
-| Gorilla 2026 *(in arrivo)* | Strategia | Gorilla + Worms Armageddon |
+| Gorilla 2026 | Strategia | Gorilla + Worms Armageddon |
 
-Ogni gioco si apre nella sua pagina con i propri salvataggi.
+Ogni gioco si apre nella sua pagina con i propri salvataggi. Micro Rush, Nailcap e Gorilla 2026 stanno su GitHub Pages; Sacro Imperio e D&D Alone per ora su claude.ai (serve l'accesso).
 
 ## Installare l'app
 
