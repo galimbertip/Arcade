@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GPverse Arcade</title>
+<meta name="description" content="GPverse Arcade: la sala giochi con tutti i giochi GPverse.">
+<meta name="theme-color" content="#07060f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GP Arcade">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07060f; --bg2:#100d22; --card:#151130; --line:#2a2350;
+    --txt:#ece9ff; --mut:#9a93c4;
+    --pink:#ff3ea5; --cyan:#22e4ff; --yel:#ffd23f; --grn:#3dff8a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--txt);font-family:Rajdhani,system-ui,sans-serif;min-height:100%}
+  body{
+    padding:calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 14px) calc(env(safe-area-inset-bottom) + 28px) calc(env(safe-area-inset-left) + 14px);
+    background:
+      radial-gradient(1200px 500px at 50% -200px, #3a1466 0%, transparent 70%),
+      linear-gradient(180deg, transparent 60%, #0b0820),
+      var(--bg);
+    background-attachment:fixed;
+  }
+  /* scanlines */
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);z-index:50}
+  .wrap{max-width:1100px;margin:0 auto}
+
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand svg{width:44px;height:44px;flex:none;filter:drop-shadow(0 0 8px var(--pink))}
+  .brand h1{font-family:"Press Start 2P",monospace;font-size:clamp(13px,3.6vw,20px);line-height:1.4;letter-spacing:1px}
+  .brand h1 span{color:var(--pink);text-shadow:0 0 10px var(--pink)}
+  .brand h1 b{color:var(--cyan);text-shadow:0 0 10px var(--cyan);font-weight:400}
+  .brand small{display:block;color:var(--mut);font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase}
+  .ver{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--yel);border:1px solid var(--yel);
+    background:transparent;padding:7px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;box-shadow:0 0 10px rgba(255,210,63,.25)}
+  .ver:hover{background:rgba(255,210,63,.1)}
+
+  /* marquee */
+  .marquee{border:1px solid var(--line);border-radius:14px;background:linear-gradient(90deg,#1b0f3a,#0e1c3a);
+    padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;overflow:hidden}
+  .marquee .ins{font-family:"Press Start 2P",monospace;font-size:10px;color:var(--yel);animation:blink 1.2s steps(2) infinite;white-space:nowrap}
+  @keyframes blink{50%{opacity:.25}}
+  .marquee p{color:var(--mut);font-size:15px;font-weight:600}
+  .marquee p strong{color:var(--txt)}
+  .cont{display:none;align-items:center;gap:12px;flex:1;min-width:0}
+  .cont .ic{width:42px;height:42px;flex:none;border-radius:10px;overflow:hidden}
+  .cont .t{min-width:0}
+  .cont .t div{font-size:12px;color:var(--mut);letter-spacing:1.5px;text-transform:uppercase}
+  .cont .t strong{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+  .cont a{margin-left:auto}
+
+  /* chips */
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;border:1px solid var(--line);background:var(--bg2);color:var(--mut);font:600 15px Rajdhani,sans-serif;
+    padding:8px 14px;border-radius:999px;cursor:pointer;transition:.15s}
+  .chip:hover{color:var(--txt);border-color:#4a3f85}
+  .chip.on{color:#0a0716;background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 14px rgba(34,228,255,.45)}
+  .chip .n{opacity:.6;margin-left:4px}
+
+  /* grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+  .card{position:relative;background:linear-gradient(180deg,var(--card),#0f0c24);border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;display:flex;flex-direction:column;transition:transform .18s,border-color .18s,box-shadow .18s}
+  .card:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 10px 30px -10px var(--accent)}
+  .art{aspect-ratio:16/9;position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  .art svg{width:100%;height:100%;display:block}
+  .tag{position:absolute;left:10px;top:10px;font:700 12px Rajdhani,sans-serif;letter-spacing:1.5px;text-transform:uppercase;
+    background:rgba(7,6,15,.75);border:1px solid var(--accent);color:var(--accent);padding:3px 8px;border-radius:6px;backdrop-filter:blur(4px)}
+  .fav{position:absolute;right:8px;top:8px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(7,6,15,.7);color:var(--mut);font-size:17px;cursor:pointer;display:grid;place-items:center}
+  .fav.on{color:var(--yel);border-color:var(--yel);text-shadow:0 0 8px var(--yel)}
+  .body{padding:14px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .body h3{font-size:21px;line-height:1.1;font-weight:700}
+  .body .sub{font-size:13px;color:var(--accent);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:-4px}
+  .body p{font-size:15px;color:var(--mut);line-height:1.35;flex:1}
+  .meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
+  .meta .last{font-size:12px;color:var(--mut)}
+  .play{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-family:"Press Start 2P",monospace;font-size:10px;
+    color:#0a0716;background:var(--accent);padding:11px 14px;border-radius:10px;box-shadow:0 0 16px -2px var(--accent);white-space:nowrap}
+  .play:hover{filter:brightness(1.15)}
+  .play.off{background:transparent;color:var(--mut);border:1px dashed var(--line);box-shadow:none;cursor:default}
+  .empty{color:var(--mut);text-align:center;padding:40px 10px;grid-column:1/-1}
+
+  footer{margin-top:26px;text-align:center;color:var(--mut);font-size:13px;line-height:1.6}
+  footer b{color:var(--txt)}
+
+  /* changelog */
+  .modal{position:fixed;inset:0;background:rgba(4,3,10,.8);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center;z-index:60;padding:14px}
+  .modal.open{display:flex}
+  .sheet{width:100%;max-width:560px;max-height:85vh;overflow:auto;background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:20px;
+    margin-bottom:env(safe-area-inset-bottom)}
+  @media(min-width:700px){.modal{align-items:center}}
+  .sheet h2{font-family:"Press Start 2P",monospace;font-size:13px;color:var(--yel);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+  .sheet h2 button{background:none;border:1px solid var(--line);color:var(--txt);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px}
+  .rel{border-left:2px solid var(--line);padding:2px 0 14px 14px;position:relative}
+  .rel::before{content:"";position:absolute;left:-6px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+  .rel h4{font-size:17px}
+  .rel h4 span{color:var(--mut);font-weight:500;font-size:14px;margin-left:6px}
+  .rel ul{margin:6px 0 0 18px;color:var(--mut);font-size:15px;line-height:1.45}
+  .note{font-size:14px;color:var(--mut);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:6px;line-height:1.4}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <rect x="6" y="4" width="36" height="40" rx="6" fill="#1a1036" stroke="#ff3ea5" stroke-width="2"/>
+        <rect x="11" y="9" width="26" height="16" rx="2" fill="#22e4ff" opacity=".85"/>
+        <rect x="14" y="13" width="4" height="4" fill="#07060f"/><rect x="22" y="17" width="4" height="4" fill="#07060f"/><rect x="30" y="13" width="4" height="4" fill="#07060f"/>
+        <circle cx="17" cy="34" r="3.5" fill="#ffd23f"/><circle cx="29" cy="32" r="2.5" fill="#ff3ea5"/><circle cx="34" cy="36" r="2.5" fill="#3dff8a"/>
+      </svg>
+      <div>
+        <h1><span>GP</span>verse <b>Arcade</b></h1>
+        <small>La tua sala giochi</small>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="ver" id="installBtn" style="display:none;color:var(--cyan);border-color:var(--cyan)">INSTALLA</button>
+      <button class="ver" id="verBtn" aria-label="Cronologia versioni"></button>
+    </div>
+  </header>
+
+  <div class="marquee" id="marquee">
+    <div class="ins" id="insert">INSERT COIN</div>
+    <p id="hello"><strong>Scegli un gioco.</strong> Ogni gioco si apre con i suoi salvataggi di sempre.</p>
+    <div class="cont" id="cont"></div>
+  </div>
+
+  <nav class="chips" id="chips"></nav>
+  <main class="grid" id="grid"></main>
+
+  <footer>
+    <b>GPverse Arcade</b> · i giochi si aprono nella loro pagina, con i progressi già salvati lì.<br>
+    <span id="installHint">Suggerimento: installala come app dal menu del browser («Installa app» o «Aggiungi alla schermata Home»).</span>
+  </footer>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <h2>Cronologia versioni <button id="close" aria-label="Chiudi">✕</button></h2>
+    <div id="log"></div>
+  </div>
+</div>
+
+<script>
+const VERSION = "1.1.0";
+const CHANGELOG = [
+  { v:"1.1.0", d:"12/11/2026", items:[
+    "La sala giochi vive nel repo GitHub galimbertip/Arcade ed è pubblicata su GitHub Pages",
+    "Installabile come app (PWA) su PC, smartphone e tablet, con icona propria",
+    "Si apre anche offline: la vetrina dei giochi resta disponibile senza rete",
+    "Pulsante «Installa» quando il dispositivo lo permette"
+  ]},
+  { v:"1.0.0", d:"12/11/2026", items:[
+    "Prima versione della sala giochi GPverse Arcade",
+    "Catalogo con Micro Rush, Nailcap, Saint Seiya: Sacro Imperio e D&D Alone",
+    "Gorilla 2026 in vetrina come «in arrivo», da collegare",
+    "Filtri per categoria, preferiti e «Continua a giocare» con l'ultimo gioco aperto",
+    "Icone illustrate per ogni gioco e cronologia versioni consultabile dal badge"
+  ]}
+];
+
+/* ---------- icone (SVG inline, una per gioco) ---------- */
+const ART = {
+micro:`<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice"><defs>
+  <linearGradient id="mr1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7a3d"/><stop offset=".55" stop-color="#ff3ea5"/><stop offset="1" stop-color="#2a0f4a"/></linearGradient></defs>
+  <rect width="320" height="180" fill="url(#mr1)"/>
+  <circle cx="160" cy="92" r="46" fill="#ffd23f" opacity=".9"/>
+  <g fill="#2a0f4a" opacity=".9"><rect x="0" y="96" width="320" height="84"/></g>
+  <path d="M120 180 L152 100 L168 100 L200 180Z" fill="#14092b"/>
+  <g stroke="#ffd23f" stroke-width="3" stroke-dasharray="10 10"><line x1="160" y1="104" x2="160" y2="180"/></g>
+  <g stroke="#22e4ff" stroke-width="1.5" opacity=".6"><line x1="0" y1="120" x2="320" y2="120"/><line x1="0" y1="140" x2="320" y2="140"/><line x1="0" y1="165" x2="320" y2="165"/></g>
+  <g transform="translate(160 150)">
+    <rect x="-30" y="-14" width="60" height="22" rx="7" fill="#22e4ff"/>
+    <rect x="-20" y="-24" width="40" height="14" rx="5" fill="#0d3b5a"/>
+    <rect x="-34" y="4" width="14" height="10" rx="3" fill="#07060f"/><rect x="20" y="4" width="14" height="10" rx="3" fill="#07060f"/>
+    <rect x="-26" y="-6" width="8" height="5" fill="#ff3ea5"/><rect x="18" y="-6" width="8" height="5" fill="#ff3ea5"/>
+  </g></svg>`,
+nail:`<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice"><defs>
+  <radialGradient id="nc1" cx=".5" cy=".3" r=".9"><stop offset="0" stop-color="#2b6b4a"/><stop offset="1" stop-color="#0a1a14"/></radialGradient></defs>
+  <rect width="320" height="180" fill="url(#nc1)"/>
+  <circle cx="250" cy="80" r="26" fill="none" stroke="#22e4ff" stroke-width="6" opacity=".85"/>
+  <circle cx="250" cy="80" r="16" fill="#22e4ff" opacity=".25"/>
+  <rect x="0" y="130" width="320" height="50" fill="#13261d"/>
+  <g fill="#3dff8a" opacity=".35"><circle cx="40" cy="140" r="3"/><circle cx="90" cy="150" r="2"/><circle cx="210" cy="145" r="3"/><circle cx="290" cy="155" r="2"/></g>
+  <g id="mush">
+    <g transform="translate(70 130)"><rect x="-5" y="-16" width="10" height="16" rx="3" fill="#f3e8d0"/><path d="M-16 -14 Q0 -36 16 -14Z" fill="#ff3ea5"/><circle cx="-6" cy="-22" r="2.5" fill="#fff"/><circle cx="5" cy="-19" r="2" fill="#fff"/></g>
+    <g transform="translate(115 130)"><rect x="-5" y="-16" width="10" height="16" rx="3" fill="#f3e8d0"/><path d="M-16 -14 Q0 -36 16 -14Z" fill="#ffd23f"/><circle cx="-5" cy="-21" r="2.5" fill="#fff"/></g>
+    <g transform="translate(160 130)"><rect x="-5" y="-16" width="10" height="16" rx="3" fill="#f3e8d0"/><path d="M-16 -14 Q0 -36 16 -14Z" fill="#22e4ff"/><circle cx="4" cy="-22" r="2.5" fill="#fff"/></g>
+    <g transform="translate(205 130)"><rect x="-5" y="-16" width="10" height="16" rx="3" fill="#f3e8d0"/><path d="M-16 -14 Q0 -36 16 -14Z" fill="#ff3ea5"/><circle cx="-3" cy="-21" r="2" fill="#fff"/></g>
+  </g>
+  <path d="M60 50 a14 14 0 1 1 0 .1" fill="none" stroke="#ffd23f" stroke-width="3"/><path d="M73 44 l6 6 -8 2Z" fill="#ffd23f"/>
+  </svg>`,
+seiya:`<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice"><defs>
+  <linearGradient id="ss1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1440"/><stop offset="1" stop-color="#2b1b5e"/></linearGradient>
+  <linearGradient id="ss2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe27a"/><stop offset="1" stop-color="#c98a1a"/></linearGradient></defs>
+  <rect width="320" height="180" fill="url(#ss1)"/>
+  <g fill="#fff"><circle cx="30" cy="30" r="1.5"/><circle cx="80" cy="18" r="1"/><circle cx="270" cy="25" r="1.5"/><circle cx="300" cy="60" r="1"/><circle cx="210" cy="14" r="1"/></g>
+  <g stroke="#7fb6ff" stroke-width="1" opacity=".7" fill="#cfe2ff"><line x1="40" y1="60" x2="70" y2="44"/><line x1="70" y1="44" x2="96" y2="58"/><circle cx="40" cy="60" r="2"/><circle cx="70" cy="44" r="2.5"/><circle cx="96" cy="58" r="2"/></g>
+  <path d="M90 180 L160 120 L230 180Z" fill="#1a1238"/>
+  <g transform="translate(160 64)">
+    <path d="M-46 22 L0 -22 L46 22Z" fill="url(#ss2)"/>
+    <rect x="-42" y="22" width="84" height="6" fill="#ffe27a"/>
+    <g fill="#e9c35a"><rect x="-36" y="28" width="8" height="38"/><rect x="-18" y="28" width="8" height="38"/><rect x="10" y="28" width="8" height="38"/><rect x="28" y="28" width="8" height="38"/></g>
+    <rect x="-46" y="66" width="92" height="7" fill="#ffe27a"/>
+  </g>
+  <circle cx="160" cy="60" r="70" fill="none" stroke="#ffd23f" stroke-width="1" opacity=".25"/>
+  </svg>`,
+dnd:`<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice"><defs>
+  <radialGradient id="dd1" cx=".5" cy=".55" r=".8"><stop offset="0" stop-color="#5a1a1a"/><stop offset="1" stop-color="#140608"/></radialGradient></defs>
+  <rect width="320" height="180" fill="url(#dd1)"/>
+  <g transform="translate(160 92)">
+    <polygon points="0,-58 50,-29 50,29 0,58 -50,29 -50,-29" fill="#c0283a" stroke="#ff8a8a" stroke-width="2"/>
+    <polygon points="0,-34 30,18 -30,18" fill="#e0384c" stroke="#ffb0b0" stroke-width="1.5"/>
+    <g stroke="#ff9a9a" stroke-width="1.2" opacity=".8"><line x1="0" y1="-58" x2="0" y2="-34"/><line x1="50" y1="-29" x2="0" y2="-34"/><line x1="-50" y1="-29" x2="0" y2="-34"/><line x1="50" y1="29" x2="30" y2="18"/><line x1="-50" y1="29" x2="-30" y2="18"/><line x1="0" y1="58" x2="30" y2="18"/><line x1="0" y1="58" x2="-30" y2="18"/><line x1="50" y1="-29" x2="30" y2="18"/><line x1="-50" y1="-29" x2="-30" y2="18"/></g>
+    <text x="0" y="8" text-anchor="middle" font-family="Press Start 2P, monospace" font-size="14" fill="#fff">20</text>
+  </g>
+  <g fill="#ffd23f" opacity=".8"><circle cx="58" cy="140" r="2"/><circle cx="270" cy="40" r="2"/><circle cx="250" cy="150" r="1.5"/></g>
+  <path d="M40 30 l6 0 -3 14Z M270 120 l10 0 -5 22Z" fill="#ff9a3d" opacity=".7"/>
+  </svg>`,
+gorilla:`<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+  <rect width="320" height="180" fill="#0d1b3a"/>
+  <circle cx="160" cy="34" r="16" fill="#ffd23f" opacity=".85"/>
+  <g fill="#1d2f5c"><rect x="10" y="90" width="40" height="90"/><rect x="58" y="70" width="44" height="110"/><rect x="110" y="110" width="36" height="70"/><rect x="154" y="84" width="40" height="96"/><rect x="202" y="60" width="44" height="120"/><rect x="254" y="100" width="56" height="80"/></g>
+  <g fill="#ffd23f" opacity=".5"><rect x="66" y="82" width="6" height="6"/><rect x="84" y="98" width="6" height="6"/><rect x="210" y="74" width="6" height="6"/><rect x="226" y="92" width="6" height="6"/><rect x="160" y="100" width="6" height="6"/></g>
+  <path d="M80 62 Q160 -10 226 52" fill="none" stroke="#22e4ff" stroke-width="2" stroke-dasharray="4 6"/>
+  <g transform="translate(80 60)"><circle r="7" fill="#7a5230"/></g>
+  <g transform="translate(224 52) rotate(30)"><path d="M-8 0 Q0 -10 8 0 Q0 -4 -8 0Z" fill="#ffd23f"/></g>
+  <rect width="320" height="180" fill="#07060f" opacity=".45"/>
+  </svg>`
+};
+
+/* ---------- catalogo ---------- */
+const GAMES = [
+  { id:"micro-rush", name:"Micro Rush", sub:"Micro Machines 2026", cat:"Corse", accent:"#ff7a3d", art:"micro",
+    desc:"Gare di macchinine in miniatura su piste fatte di oggetti di casa, con lo spirito arcade di Out Run e World Rally.",
+    url:"https://claude.ai/artifact/KgQ2eJc1pjEdrwSpP4cL9T" },
+  { id:"nailcap", name:"Nailcap", sub:"Lemmings 2026", cat:"Puzzle", accent:"#3dff8a", art:"nail",
+    desc:"Guida la folla di funghetti Nailcap in 5 mondi e 25 livelli assegnando ruoli, con riavvolgimento del tempo, vento, buio e micelio.",
+    url:"https://claude.ai/artifact/5sEyKAJeaswN63Bfa5cPKf" },
+  { id:"sacro-imperio", name:"Saint Seiya: Sacro Imperio", sub:"GDR punta e clicca", cat:"GDR e Avventura", accent:"#ffd23f", art:"seiya",
+    desc:"Pixel art anni '90: esplora il Grande Tempio, le Case d'Oro, la taverna e l'arena, con allenamenti e scontri ai dadi.",
+    url:"https://claude.ai/artifact/43ZCcHNYXpgadKqPigW2kb" },
+  { id:"dnd-alone", name:"D&D Alone", sub:"Avventura in solitaria", cat:"GDR e Avventura", accent:"#ff5a6e", art:"dnd",
+    desc:"Avventura di Dungeons & Dragons da giocare da solo, con il master gestito da Claude e la tua scheda personaggio.",
+    url:"https://claude.ai/artifact/4EZPvY3tKXK8WiBAG5nGor" },
+  { id:"gorilla", name:"Gorilla 2026", sub:"Gorilla + Worms", cat:"Strategia", accent:"#22e4ff", art:"gorilla",
+    desc:"Il duello di banane tra i grattacieli rifatto con lo spirito di Worms Armageddon. Da collegare alla sala giochi.",
+    url:null }
+];
+
+/* ---------- stato locale (solo comodità di questo dispositivo) ---------- */
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem("gpa_"+k); return v?JSON.parse(v):d }catch(e){ return d } },
+  set(k,v){ try{ localStorage.setItem("gpa_"+k, JSON.stringify(v)) }catch(e){} }
+};
+let favs = store.get("favs", []);
+let plays = store.get("plays", {});   // id -> timestamp
+let cat = "Tutti";
+try{ const h=decodeURIComponent(location.hash.slice(1)); if(h) cat = h==="preferiti" ? "★ Preferiti" : (catFromSlug(h)||"Tutti"); }catch(e){}
+
+function slug(s){ return s.toLowerCase().normalize("NFD").replace(/[^\w]+/g,"-").replace(/^-|-$/g,"") }
+function catFromSlug(s){ return [...new Set(GAMES.map(g=>g.cat))].find(c=>slug(c)===s) }
+function ago(ts){
+  const m = Math.round((Date.now()-ts)/60000);
+  if(m<1) return "proprio ora"; if(m<60) return m+" min fa";
+  const h=Math.round(m/60); if(h<24) return h+" h fa";
+  const d=Math.round(h/24); return d===1?"ieri":d+" giorni fa";
+}
+
+function renderChips(){
+  const cats = ["Tutti","★ Preferiti",...new Set(GAMES.map(g=>g.cat))];
+  const el = document.getElementById("chips");
+  el.innerHTML = cats.map(c=>{
+    const n = c==="Tutti"?GAMES.length : c==="★ Preferiti"?favs.length : GAMES.filter(g=>g.cat===c).length;
+    return `<button class="chip ${c===cat?"on":""}" data-c="${c}">${c}<span class="n">${n}</span></button>`;
+  }).join("");
+  el.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+    cat=b.dataset.c;
+    const h = cat==="Tutti" ? "" : cat==="★ Preferiti" ? "preferiti" : slug(cat);
+    try{ history.replaceState(null,"", h?"#"+h:location.pathname) }catch(e){}
+    renderChips(); renderGrid();
+  });
+}
+
+function renderGrid(){
+  let list = cat==="Tutti" ? GAMES : cat==="★ Preferiti" ? GAMES.filter(g=>favs.includes(g.id)) : GAMES.filter(g=>g.cat===cat);
+  const grid = document.getElementById("grid");
+  if(!list.length){ grid.innerHTML = `<div class="empty">Nessun preferito ancora: tocca la ★ su un gioco per aggiungerlo.</div>`; return }
+  grid.innerHTML = list.map(g=>`
+    <article class="card" style="--accent:${g.accent}">
+      <div class="art">${ART[g.art]}
+        <span class="tag">${g.cat}</span>
+        <button class="fav ${favs.includes(g.id)?"on":""}" data-id="${g.id}" aria-label="Preferito">★</button>
+      </div>
+      <div class="body">
+        <h3>${g.name}</h3>
+        <div class="sub">${g.sub}</div>
+        <p>${g.desc}</p>
+        <div class="meta">
+          <span class="last">${plays[g.id]?"Giocato "+ago(plays[g.id]):(g.url?"Mai aperto da qui":"In arrivo")}</span>
+          ${g.url
+            ? `<a class="play" href="${g.url}" target="_blank" rel="noopener" data-id="${g.id}">▶ GIOCA</a>`
+            : `<span class="play off">PRESTO</span>`}
+        </div>
+      </div>
+    </article>`).join("");
+  grid.querySelectorAll(".fav").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.id;
+    favs = favs.includes(id) ? favs.filter(x=>x!==id) : [...favs,id];
+    store.set("favs",favs); renderChips(); renderGrid();
+  });
+  grid.querySelectorAll("a.play").forEach(a=>a.addEventListener("click",()=>markPlayed(a.dataset.id)));
+}
+
+function markPlayed(id){
+  plays[id]=Date.now(); store.set("plays",plays);
+  setTimeout(()=>{ renderGrid(); renderContinue(); },300);
+}
+
+function renderContinue(){
+  const ids = Object.keys(plays).filter(id=>GAMES.find(g=>g.id===id&&g.url));
+  if(!ids.length) return;
+  const id = ids.sort((a,b)=>plays[b]-plays[a])[0];
+  const g = GAMES.find(x=>x.id===id);
+  document.getElementById("insert").style.display="none";
+  document.getElementById("hello").style.display="none";
+  const c = document.getElementById("cont");
+  c.style.display="flex";
+  c.innerHTML = `<div class="ic">${ART[g.art]}</div>
+    <div class="t"><div>Continua a giocare</div><strong>${g.name}</strong></div>
+    <a class="play" style="--accent:${g.accent};background:${g.accent};box-shadow:0 0 16px -2px ${g.accent}" href="${g.url}" target="_blank" rel="noopener">▶</a>`;
+  c.querySelector("a").addEventListener("click",()=>markPlayed(g.id));
+}
+
+/* ---------- cronologia versioni ---------- */
+document.getElementById("verBtn").textContent = "V." + VERSION;
+document.getElementById("log").innerHTML = CHANGELOG.map(r=>`
+  <div class="rel"><h4>V.${r.v}<span>${r.d}</span></h4><ul>${r.items.map(i=>`<li>${i}</li>`).join("")}</ul></div>`).join("")
+  + `<div class="note">Schema V.major.minor.patch — major: cambi grossi alla sala giochi · minor: nuovi giochi o funzioni · patch: correzioni.</div>`;
+const modal = document.getElementById("modal");
+document.getElementById("verBtn").onclick=()=>modal.classList.add("open");
+document.getElementById("close").onclick=()=>modal.classList.remove("open");
+modal.onclick=e=>{ if(e.target===modal) modal.classList.remove("open") };
+
+window.addEventListener("hashchange",()=>{
+  const h=location.hash.slice(1);
+  cat = !h ? "Tutti" : h==="preferiti" ? "★ Preferiti" : (catFromSlug(h)||"Tutti");
+  renderChips(); renderGrid();
+});
+
+/* ---------- installazione come app (PWA) ---------- */
+let deferredPrompt = null;
+const installBtn = document.getElementById("installBtn");
+window.addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); deferredPrompt=e; installBtn.style.display="inline-block"; });
+installBtn.onclick = async ()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt(); try{ await deferredPrompt.userChoice }catch(e){}
+  deferredPrompt=null; installBtn.style.display="none";
+};
+window.addEventListener("appinstalled", ()=>{ installBtn.style.display="none" });
+if (window.matchMedia("(display-mode: standalone)").matches || navigator.standalone) {
+  const h=document.getElementById("installHint"); if(h) h.textContent="Stai usando l'app installata.";
+}
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+
+renderChips(); renderGrid(); renderContinue();
+</script>
+</body>
+</html>
